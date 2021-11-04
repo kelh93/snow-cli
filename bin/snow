@@ -1,1 +1,110 @@
 #!/usr/bin/env node
+
+const figlet = require('figlet');
+const lolcatjs = require('lolcatjs');
+const { program } = require('commander');
+const inquirer = require('inquirer');
+const chalk = require('chalk');
+const ora = require('ora');
+// const osHomedir = require('os-homedir');
+const shell = require('shelljs');
+const download = require('download-git-repo');
+
+lolcatjs.options.seed = Math.round(Math.random() * 1000);
+lolcatjs.options.colors = true;
+
+const myName = figlet.textSync('SNOW CLI');
+const version = 'v1.0.0';
+const ads = myName + '\n' + '^v^ @kelh93 ' + version;
+lolcatjs.fromString(ads);
+
+const templateUrl = 'direct:https://github.com/kelh93/webpack5-toolkit.git';
+
+const eventsHandler = {
+  init() {
+    // console.log('初始化项目');
+
+    inquirer
+      .prompt([
+        {
+          type: 'text',
+          message: '📂 project name:',
+          name: 'project',
+        },
+        {
+          type: 'list',
+          name: 'type',
+          choices: ['✔ React', '✔ Vue2', '✔ Vue3', '✔ Playground'],
+        },
+      ])
+      .then((answers) => {
+        const _dirname = answers.project;
+        if (_dirname) {
+          // const spinner = ora('Create Project').start();
+          console.log(chalk.white('🔨 正在创建项目目录'));
+          const _pwd = shell.pwd().stdout;
+          const __projectPath = `${_pwd}/${_dirname}`;
+          shell.cd(_pwd);
+          shell.rm('-rf', __projectPath);
+          shell.mkdir(_dirname);
+          console.log(chalk.green('🏆 创建成功'));
+        }
+
+        switch (answers.type) {
+          case '✔ React':
+            const spinner = ora(chalk.green('ლ(′◉❥◉｀ლ) download template...')).start();
+            download(templateUrl, __projectPath, { clone: true }, (err) => {
+              spinner.stop();
+              if (err) {
+                console.error(chalk.red('下载出错了'), err);
+              } else {
+                console.log(chalk.green('✔ 下载成功'));
+                // 替换项目名称
+                // shell.sed('-i', 'aaa', _dirname, __projectPath + '/package.json');
+              }
+            });
+            break;
+          case '✔ Vue2':
+            console.log(chalk.yellow('>_< Vue2暂未开发, 敬请期待~'));
+            break;
+          case '✔ Vue3':
+            console.log(chalk.yellow('>_< Vue3暂未开发, 敬请期待~'));
+            break;
+          case '✔ Playground':
+            console.log(chalk.green('👏🏻👏🏻👏🏻  欢迎来到演练场~'));
+            break;
+          default:
+            break;
+        }
+        // if(type == 'react'){
+        //   console.log('i got it')
+        // }
+      })
+      .catch((error) => {
+        if (error.isTtyError) {
+          // Prompt couldn't be rendered in the current environment
+        } else {
+          // Something else went wrong
+        }
+      });
+  },
+  json2ts() {},
+};
+
+program.version(ads, '-v, --version');
+program.option('-i, --init', '🔨 初始化项目');
+program
+  .usage('<cmd>')
+  .arguments('<cmd>')
+  .action(function (cmd, options) {
+    const result = eventsHandler[cmd];
+    if (result) {
+      result();
+    } else {
+    }
+    // console.log(cmd);
+  });
+
+program.parse(process.argv);
+
+// console.log(result);

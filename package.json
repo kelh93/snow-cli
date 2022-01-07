@@ -1,5 +1,5 @@
 {
-  "name": "snow-cli",
+  "name": "@snow/cli",
   "version": "1.0.0",
   "description": "webpack toolkit",
   "main": "index.js",

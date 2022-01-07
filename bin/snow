@@ -6,20 +6,17 @@ const { program } = require('commander');
 const inquirer = require('inquirer');
 const chalk = require('chalk');
 const ora = require('ora');
-// const osHomedir = require('os-homedir');
 const shell = require('shelljs');
-const download = require('download-git-repo');
 
 lolcatjs.options.seed = Math.round(Math.random() * 1000);
 lolcatjs.options.colors = true;
 
 const myName = figlet.textSync('SNOW CLI');
-const version = 'v1.0.0';
+const version = 'v1.0.1';
 const ads = myName + '\n' + '^v^ @kelh93 ' + version;
 lolcatjs.fromString(ads);
 
-const templateUrl = 'direct:https://github.com/kelh93/webpack5-toolkit.git';
-
+const reactTemplate = 'react-admin-template';
 const eventsHandler = {
   init() {
     // console.log('初始化项目');
@@ -47,20 +44,26 @@ const eventsHandler = {
           shell.cd(_pwd);
           shell.rm('-rf', __projectPath);
           shell.mkdir(_dirname);
+          shell.cd(_dirname);
           console.log(chalk.green('🏆 创建成功'));
         }
 
         switch (answers.type) {
           case '✔ React':
             const spinner = ora(chalk.green('ლ(′◉❥◉｀ლ) download template...')).start();
-            download(templateUrl, __projectPath, { clone: true }, (err) => {
-              spinner.stop();
-              if (err) {
-                console.error(chalk.red('下载出错了'), err);
+            shell.exec(`git clone git@github.com:kelh93/${reactTemplate}.git`, function (code, stdout, stderr) {
+              if (code == 0) {
+                // 下载成功
+                shell.mv(`./${reactTemplate}/*`, './');
+                shell.rm('-rf', reactTemplate);
+                spinner.stop();
+                console.log(chalk.green('🏮 项目初始化完成'));
+                console.log(`🍺 进入项目: cd ${_dirname}`);
+                console.log(`🚚 安装依赖: yarn install`);
+                console.log(`🍺 启动项目: yarn start`);
               } else {
-                console.log(chalk.green('✔ 下载成功'));
-                // 替换项目名称
-                // shell.sed('-i', 'aaa', _dirname, __projectPath + '/package.json');
+                console.log(chalk.red(`下载模板失败, ${code} , ${stdout}, ${stderr}`));
+                spinner.stop();
               }
             });
             break;
